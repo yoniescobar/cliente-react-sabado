@@ -45,7 +45,7 @@ const Categoria = () => {
     }
 
     //focus en el input nombre
-    document.getElementById('name').focus()  // es para que el cursor se posicione en el input nombre
+    document.getElementById('nombre').focus()  // es para que el cursor se posicione en el input nombre
 
   }
 
@@ -67,7 +67,7 @@ const Categoria = () => {
       if (operacion === 1) {
         agregarCategoria()
       } else if (operacion === 2) {
-        //editarCategoria()
+        updateCategoria()
       }
     }
   }
@@ -81,12 +81,13 @@ const Categoria = () => {
       showCancelButton: true,
       confirmButtonText: 'Si',
       cancelButtonText: 'No',
-    }).then(async(result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const response = await axios.post(`${url}/categorias`, {
-           nombre: nombre,
-           descripcion: descripcion,
+            nombre: nombre,
+            descripcion: descripcion,
+
           })
           console.log(response.data)
           await getCategorias()
@@ -97,6 +98,57 @@ const Categoria = () => {
       }
     })
   }
+
+  // ----------- udpate categoria ------------------//
+  const updateCategoria = async () => {
+    Swal.fire({
+      title: '¿Está seguro de actualizar la categoria?',
+      text: nombre,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Si',
+      cancelButtonText: 'No',
+    }).then(async (result) => { // async: es para que espere a que se ejecute await y luego continue el codigo
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.put(`${url}/categorias/${id}`, {
+            nombre: nombre,
+            descripcion: descripcion,
+          })
+          console.log(response.data)
+          await getCategorias()
+          document.getElementById('btnCerrar').click()
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    })
+  }
+  //------------------ Eliminar categoria ------------------//
+
+  const eliminarCategoria = async (categoria) => {
+    Swal.fire({
+      title: `¿Está seguro de eliminar categoria ? ${categoria.nombre}`,
+      text: categoria.nombre,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Si',
+      cancelButtonText: 'No',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.delete(`${url}/categorias/${categoria.id}`) // http://localhost:8080/api/v1/categorias/1
+          console.log(response.data)
+          await getCategorias()
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    })
+  }
+
+
+
 
 
   // ------------------------- Renderizar el listado categoria  ------------------------- //
@@ -112,7 +164,7 @@ const Categoria = () => {
         <div className='row mt-3'>
           <div className='col-md-4 offset-md-4'>
             <div className='d-grid mx-auto'>
-              <button onClick={()=>openModal(1)} className='btn btn-dark btn-block' data-bs-toggle='modal' data-bs-target='#modalcategorias'>
+              <button onClick={() => openModal(1)} className='btn btn-dark btn-block' data-bs-toggle='modal' data-bs-target='#modalcategorias'>
                 <i className='fa-solid fa-circle-plus'></i> Agregar categoria
               </button>
             </div>
@@ -138,10 +190,10 @@ const Categoria = () => {
                     <td>{categoria.nombre}</td>
                     <td>{categoria.descripcion}</td>
                     <td>
-                      <button className='btn btn-sm  btn-outline-warning mx-1' data-bs-toggle='modal' data-bs-target='#modalcategorias' >
+                      <button onClick={() => openModal(2, categoria.id, categoria.nombre, categoria.descripcion)} className='btn btn-sm  btn-outline-warning mx-1' data-bs-toggle='modal' data-bs-target='#modalcategorias' >
                         <i className='fa-solid fa-pencil'></i>
                       </button>
-                      <button className='btn btn-sm  btn-outline-danger '>
+                      <button onClick={() => eliminarCategoria(categoria)} className='btn btn-sm  btn-outline-danger '>
                         <i className='fa-solid fa-trash'></i>
                       </button>
                     </td>
@@ -189,7 +241,7 @@ const Categoria = () => {
               </div>
               {/* Boton Guardar */}
               <div className='d-grid col-6 mx-auto'>
-                <button onClick={()=>validar()} className='btn btn-success btn-block'>
+                <button onClick={() => validar()} className='btn btn-success btn-block'>
                   <i className='fa-solid fa-save'></i> Guardar...
                 </button>
               </div>
