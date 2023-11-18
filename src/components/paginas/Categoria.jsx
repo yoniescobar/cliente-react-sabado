@@ -13,12 +13,14 @@ const Categoria = () => {
   const [title, setTitle] = useState('')
   const [operacion, setOperacion] = useState('') // 1 = Agregar, 2 = Editar
 
+  const [error, setError] = useState('');
 
   // ------------------------- Funcion para obtener las categorias ------------------------- //
   const getCategorias = async () => {
     try {
       const response = await axios.get(`${url}/categorias`) // http://localhost:8080/api/v1/categorias
       setCategorias(response.data.categoriaResponse.categorias)
+      setError(response.data.metadata.dato);
       console.log(response.data.categoriaResponse.categorias)
     }
     catch (error) {
@@ -33,6 +35,7 @@ const Categoria = () => {
     setId('')
     setNombre('')
     setDescripcion('')
+    setError(null)
 
     setOperacion(op)
     if (op === 1) {
@@ -91,9 +94,19 @@ const Categoria = () => {
           })
           console.log(response.data)
           await getCategorias()
+          // Restablece el estado del error
+          setError(null);
           document.getElementById('btnCerrar').click()
         } catch (error) {
-          console.log(error)
+          // Maneja el error de la respuesta
+          if (error.response && error.response.status ===
+            500) {
+            // Si el código de respuesta es 500, actualiza el estado del error
+            setError("Ya existe una categoría con ese nombre");
+          } else {
+            // Maneja otros errores si es necesario
+            console.error("Error desconocido:", error);
+          }
         }
       }
     })
@@ -117,9 +130,19 @@ const Categoria = () => {
           })
           console.log(response.data)
           await getCategorias()
+          // Restablece el estado del error
+          setError(null);
           document.getElementById('btnCerrar').click()
         } catch (error) {
-          console.log(error)
+          // Maneja el error de la respuesta
+          if (error.response && error.response.status ===
+            500) {
+            // Si el código de respuesta es 500, actualiza el estado del error
+            setError("Ya existe una categoría con ese nombre");
+          } else {
+            // Maneja otros errores si es necesario
+            console.error("Error desconocido:", error);
+          }
         }
       }
     })
@@ -216,6 +239,11 @@ const Categoria = () => {
             </div>
             {/* Cuerpo del Modal */}
             <div className='modal-body'>
+              {error && (
+                <div style={{ color: 'red' }}>
+                  {error}
+                </div>
+              )}
               <input type='hidden' id='id' value={id}></input>
               <div className='input-group mb-3'>
                 <span className='input-group-text'><i className="fa-solid fa-user"></i></span>
